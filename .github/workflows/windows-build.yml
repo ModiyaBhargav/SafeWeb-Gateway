@@ -55,10 +55,12 @@ jobs:
             "Signing: unsigned CI build"
             "WinDivert: not bundled; obtain only through the project's documented installer and upstream release"
           ) | Set-Content -Path .\artifacts\BUILD-INFO.txt -Encoding utf8
-          Get-ChildItem .\artifacts\publish -File -Recurse |
-            Get-FileHash -Algorithm SHA256 |
-            ForEach-Object { "$($_.Hash)  $($_.Path)" } |
-            Set-Content -Path .\artifacts\SHA256SUMS.txt -Encoding utf8
+          $publishRoot = (Resolve-Path .\artifacts\publish).Path
+          Get-ChildItem .\artifacts\publish -File -Recurse | ForEach-Object {
+            $hash = Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256
+            $relative = $_.FullName.Substring($publishRoot.Length + 1)
+            "$($hash.Hash)  $relative"
+          } | Set-Content -Path .\artifacts\SHA256SUMS.txt -Encoding utf8
 
       - name: Upload unsigned build artifact
         uses: actions/upload-artifact@v6
