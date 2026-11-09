@@ -76,6 +76,9 @@ jobs:
           Copy-Item .\LICENSE $stage
           Copy-Item .\THIRD-PARTY-NOTICES.md $stage
           Copy-Item .\docs\LIMITATIONS.md $stage
+          New-Item -ItemType Directory -Force -Path (Join-Path $stage 'docs') | Out-Null
+          Copy-Item .\docs\CODE-SIGNING-POLICY.md (Join-Path $stage 'docs')
+          Copy-Item .\docs\PRIVACY.md (Join-Path $stage 'docs')
           Copy-Item .\artifacts\BUILD-INFO.txt $stage
           $files = Get-ChildItem $stage -File -Recurse
           $root = (Resolve-Path $stage).Path
