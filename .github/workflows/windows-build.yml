@@ -62,6 +62,40 @@ jobs:
             "$($hash.Hash)  $relative"
           } | Set-Content -Path .\artifacts\SHA256SUMS.txt -Encoding utf8
 
+      - name: Assemble Windows distribution package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stage = Join-Path (Resolve-Path .\artifacts).Path 'SafeWeb-Gateway-v4.5-win-x64'
+          New-Item -ItemType Directory -Force -Path (Join-Path $stage 'app') | Out-Null
+          Copy-Item .\artifacts\publish\* (Join-Path $stage 'app') -Recurse -Force
+          Copy-Item .\distribution\Start-SafeWeb.cmd $stage
+          Copy-Item .\distribution\Install-And-Run.ps1 $stage
+          Copy-Item .\distribution\README-INSTALL.txt $stage
+          Copy-Item .\README.md $stage
+          Copy-Item .\LICENSE $stage
+          Copy-Item .\THIRD-PARTY-NOTICES.md $stage
+          Copy-Item .\docs\LIMITATIONS.md $stage
+          Copy-Item .\artifacts\BUILD-INFO.txt $stage
+          $files = Get-ChildItem $stage -File -Recurse
+          $root = (Resolve-Path $stage).Path
+          $lines = foreach ($file in $files) {
+            $hash = Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256
+            $relative = $file.FullName.Substring($root.Length + 1)
+            "$($hash.Hash)  $relative"
+          }
+          $lines | Set-Content (Join-Path $stage 'SHA256SUMS.txt') -Encoding utf8
+          $zip = Join-Path (Resolve-Path .\artifacts).Path 'SafeWeb-Gateway-v4.5-win-x64.zip'
+          Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal -Force
+
+      - name: Upload Windows distribution package
+        uses: actions/upload-artifact@v6
+        with:
+          name: SafeWeb-Gateway-v4.5-win-x64-package
+          path: artifacts/SafeWeb-Gateway-v4.5-win-x64.zip
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Upload unsigned build artifact
         uses: actions/upload-artifact@v6
         with:
