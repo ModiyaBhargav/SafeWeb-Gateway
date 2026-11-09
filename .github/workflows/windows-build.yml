@@ -50,7 +50,8 @@ jobs:
             "Commit: $commit"
             "Git ref: $ref"
             "Runner: Windows x64"
-            ".NET SDK: 8.0.x"\n            "Runtime target: win-x64 (framework-dependent; .NET 8 runtime required)"
+            ".NET SDK: 8.0.x"
+            "Runtime target: win-x64 (framework-dependent; .NET 8 runtime required)"
             "Signing: unsigned CI build"
             "WinDivert: not bundled; obtain only through the project's documented installer and upstream release"
           ) | Set-Content -Path .\artifacts\BUILD-INFO.txt -Encoding utf8
