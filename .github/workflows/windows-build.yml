@@ -21,10 +21,10 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up .NET 8 SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
 
@@ -60,7 +60,7 @@ jobs:
             Set-Content -Path .\artifacts\SHA256SUMS.txt -Encoding utf8
 
       - name: Upload unsigned build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: SafeWeb-Gateway-win-x64-${{ github.sha }}
           path: |
