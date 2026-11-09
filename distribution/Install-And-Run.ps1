@@ -74,6 +74,20 @@ Expected SHA-256: $expectedArchiveSha256
     }
 }
 
+# Always validate the runtime files, including files that were already present.
+if (-not (Test-Path -LiteralPath $nativeDll -PathType Leaf)) {
+    throw "WinDivert.dll is missing: $nativeDll"
+}
+if (-not (Test-Path -LiteralPath $driver -PathType Leaf)) {
+    throw "WinDivert64.sys is missing: $driver"
+}
+
+$existingDriverSignature = Get-AuthenticodeSignature -FilePath $driver
+if ($existingDriverSignature.Status -ne 'Valid') {
+    throw "WinDivert64.sys signature validation failed (status: $($existingDriverSignature.Status)). SafeWeb will not start."
+}
+Write-Host "WinDivert driver signature verified: $($existingDriverSignature.SignerCertificate.Subject)"
+
 Set-Location $app
 Write-Host 'Starting SafeWeb Gateway...'
 $process = Start-Process -FilePath $exe -WorkingDirectory $app -PassThru
