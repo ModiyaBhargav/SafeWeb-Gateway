@@ -9,6 +9,10 @@ SafeWeb Gateway runs locally on a Windows laptop or PC and filters traffic from 
 - Local SQLite database and localhost dashboard.
 - Windows x64 packet interception using WinDivert.
 
+## Code signing policy
+
+SafeWeb Gateway is currently unsigned. The project is preparing an application for the SignPath Foundation open-source signing program; acceptance is not guaranteed and signing is not active. See [Code signing policy](docs/CODE-SIGNING-POLICY.md) for the proposed scope, maintainer roles, build provenance, and privacy details.
+
 ## Project status
 
 SafeWeb Gateway v4.5 is an enforcement test build. It provides IPv4 DNS interception and IPv4 HTTPS SNI inspection, with documented limitations.
