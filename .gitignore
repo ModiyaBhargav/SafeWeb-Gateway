@@ -1,0 +1,41 @@
+# .NET build output
+**/bin/
+**/obj/
+.vs/
+TestResults/
+
+# Local/runtime data
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+logs/
+data/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+appsettings.*.Local.json
+secrets.json
+*.pfx
+*.p12
+*.key
+*.pem
+
+# Downloaded native runtime binaries (installer retrieves official package)
+/native/WinDivert.dll
+/native/WinDivert64.sys
+/native/*.cat
+
+# Local code-integrity policy artifacts
+security-policy/
+*.cip
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+*.user
+*.suo
