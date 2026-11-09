@@ -92,7 +92,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: SafeWeb-Gateway-v4.5-win-x64-package
-          path: artifacts/SafeWeb-Gateway-v4.5-win-x64.zip
+          path: artifacts/SafeWeb-Gateway-v4.5-win-x64/
           if-no-files-found: error
           retention-days: 14
 
