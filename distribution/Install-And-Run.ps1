@@ -4,7 +4,9 @@ $app = Join-Path $root 'app'
 $exe = Join-Path $app 'SafeWebGateway.exe'
 $nativeDll = Join-Path $app 'WinDivert.dll'
 $driver = Join-Path $app 'WinDivert64.sys'
-$downloadUrl = 'https://github.com/basil00/WinDivert/releases/download/v2.2.2/WinDivert-2.2.2-A.zip'
+$windivertArchive = Join-Path $root 'WinDivert-2.2.2-A.zip'
+$expectedArchiveSha256 = '63cb41763bb4b20f600b6de04e991a9c2be73279e317d4d82f237b150c5f3f15'
+$officialReleaseUrl = 'https://github.com/basil00/WinDivert/releases/tag/v2.2.2'
 
 function Test-Administrator {
     $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -30,25 +32,46 @@ if ($LASTEXITCODE -ne 0 -or -not ($runtimes -match '^Microsoft.NETCore.App 8\.')
 }
 
 if (-not (Test-Path $nativeDll) -or -not (Test-Path $driver)) {
-    $zip = Join-Path $env:TEMP 'SafeWeb-WinDivert-2.2.2-A.zip'
-    $extract = Join-Path $env:TEMP ('SafeWeb-WinDivert-' + [guid]::NewGuid().ToString('N'))
-    Write-Host 'Downloading the official WinDivert 2.2.2-A x64 package...'
-    Invoke-WebRequest -Uri $downloadUrl -OutFile $zip
-    Expand-Archive -LiteralPath $zip -DestinationPath $extract -Force
-    $dll = Get-ChildItem -LiteralPath $extract -Filter 'WinDivert.dll' -File -Recurse | Select-Object -First 1
-    if (-not $dll) { throw 'WinDivert.dll was not found in the official package.' }
-    $sys = Join-Path $dll.DirectoryName 'WinDivert64.sys'
-    if (-not (Test-Path $sys)) { throw 'WinDivert64.sys was not found beside WinDivert.dll.' }
-    $signature = Get-AuthenticodeSignature -FilePath $sys
-    if ($signature.Status -ne 'Valid') {
-        throw "WinDivert driver signature is not valid (status: $($signature.Status)). The driver was not installed."
+    if (-not (Test-Path $windivertArchive)) {
+        throw @"
+WinDivert is not installed. Automatic downloading is intentionally disabled while the
+official 2.2.2-A archive has an unresolved Microsoft Defender report.
+Do not disable Defender, restore a quarantined file, or add an exclusion.
+Only continue after the upstream/Microsoft review is resolved. If you have an independently
+verified archive, place it here:
+$windivertArchive
+Official release information: $officialReleaseUrl
+Expected SHA-256: $expectedArchiveSha256
+"@
     }
-    Copy-Item -LiteralPath $dll.FullName -Destination $nativeDll -Force
-    Copy-Item -LiteralPath $sys -Destination $driver -Force
-    $license = Get-ChildItem -LiteralPath $extract -Filter 'LICENSE*' -File -Recurse | Select-Object -First 1
-    if ($license) { Copy-Item -LiteralPath $license.FullName -Destination (Join-Path $root 'WinDivert-LICENSE.txt') -Force }
-    Remove-Item -LiteralPath $extract -Recurse -Force
-    Write-Host "Verified WinDivert driver signer: $($signature.SignerCertificate.Subject)"
+
+    $actualArchiveSha256 = (Get-FileHash -LiteralPath $windivertArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($actualArchiveSha256 -ne $expectedArchiveSha256) {
+        throw "WinDivert archive SHA-256 mismatch. Expected $expectedArchiveSha256; got $actualArchiveSha256. No files were extracted."
+    }
+
+    $extract = Join-Path $env:TEMP ('SafeWeb-WinDivert-' + [guid]::NewGuid().ToString('N'))
+    try {
+        Expand-Archive -LiteralPath $windivertArchive -DestinationPath $extract -Force
+        $dll = Get-ChildItem -LiteralPath $extract -Filter 'WinDivert.dll' -File -Recurse | Select-Object -First 1
+        if (-not $dll) { throw 'WinDivert.dll was not found in the verified archive.' }
+        $sys = Join-Path $dll.DirectoryName 'WinDivert64.sys'
+        if (-not (Test-Path $sys)) { throw 'WinDivert64.sys was not found beside WinDivert.dll.' }
+
+        $signature = Get-AuthenticodeSignature -FilePath $sys
+        if ($signature.Status -ne 'Valid') {
+            throw "WinDivert driver signature is not valid (status: $($signature.Status)). The driver was not installed."
+        }
+
+        Copy-Item -LiteralPath $dll.FullName -Destination $nativeDll -Force
+        Copy-Item -LiteralPath $sys -Destination $driver -Force
+        $license = Get-ChildItem -LiteralPath $extract -Filter 'LICENSE*' -File -Recurse | Select-Object -First 1
+        if ($license) { Copy-Item -LiteralPath $license.FullName -Destination (Join-Path $root 'WinDivert-LICENSE.txt') -Force }
+        Write-Host "Verified archive SHA-256 and driver signer: $($signature.SignerCertificate.Subject)"
+    }
+    finally {
+        if (Test-Path $extract) { Remove-Item -LiteralPath $extract -Recurse -Force }
+    }
 }
 
 Set-Location $app
