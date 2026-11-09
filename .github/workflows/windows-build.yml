@@ -29,13 +29,13 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore dependencies
-        run: dotnet restore .\src\SafeWebGateway\SafeWebGateway.csproj
+        run: dotnet restore .\src\SafeWebGateway\SafeWebGateway.csproj --runtime win-x64
 
       - name: Build Release
-        run: dotnet build .\src\SafeWebGateway\SafeWebGateway.csproj --configuration Release --no-restore
+        run: dotnet build .\src\SafeWebGateway\SafeWebGateway.csproj --configuration Release --runtime win-x64 --no-restore
 
       - name: Publish Windows x64 application
-        run: dotnet publish .\src\SafeWebGateway\SafeWebGateway.csproj --configuration Release --no-restore --output .\artifacts\publish
+        run: dotnet publish .\src\SafeWebGateway\SafeWebGateway.csproj --configuration Release --runtime win-x64 --self-contained false --no-restore --output .\artifacts\publish
 
       - name: Create build provenance and checksums
         shell: pwsh
@@ -50,7 +50,7 @@ jobs:
             "Commit: $commit"
             "Git ref: $ref"
             "Runner: Windows x64"
-            ".NET SDK: 8.0.x"
+            ".NET SDK: 8.0.x"\n            "Runtime target: win-x64 (framework-dependent; .NET 8 runtime required)"
             "Signing: unsigned CI build"
             "WinDivert: not bundled; obtain only through the project's documented installer and upstream release"
           ) | Set-Content -Path .\artifacts\BUILD-INFO.txt -Encoding utf8
