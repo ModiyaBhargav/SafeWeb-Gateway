@@ -43,7 +43,7 @@ The current build has documented limitations, including IPv6, DoH, DoT, ECH, VPN
 
 ## Privacy
 
-SafeWeb's dashboard binds to localhost (127.0.0.1). Rule and activity data, including observed client IP addresses and domain activity, are stored in a local SQLite database under %ProgramData%\SafeWeb\safeweb.db. For allowed DNS requests, SafeWeb forwards DNS queries to the configured public upstream resolvers (currently Cloudflare 1.1.1.1 and Google 8.8.8.8). Those DNS requests necessarily leave the local computer to be resolved by the selected upstream. The application source currently reports cloud = false and contains no application telemetry or account upload feature. Users should review the upstream resolver privacy policies and the behavior of Windows, WinDivert, and other third-party components separately.
+See the project's [Privacy Notice](PRIVACY.md). In summary, SafeWeb's dashboard binds to localhost (127.0.0.1). Rule and activity data, including observed client IP addresses and domain activity, are stored in a local SQLite database under %ProgramData%\SafeWeb\safeweb.db. For allowed DNS requests, SafeWeb forwards DNS queries to the configured public upstream resolvers (currently Cloudflare 1.1.1.1 and Google 8.8.8.8). Those DNS requests necessarily leave the local computer to be resolved by the selected upstream. The application source currently reports cloud = false and contains no application telemetry or account upload feature. Users should review the upstream resolver privacy policies and the behavior of Windows, WinDivert, and other third-party components separately.
 
 ## User-visible system changes and removal
 
