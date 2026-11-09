@@ -13,7 +13,9 @@ function Test-Administrator {
 }
 
 if (-not (Test-Administrator)) {
-    Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath) -Verb RunAs
+    $command = "& '$($PSCommandPath.Replace("'", "''"))'"
+    $encoded = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($command))
+    Start-Process -FilePath 'powershell.exe' -ArgumentList "-NoProfile -EncodedCommand $encoded" -Verb RunAs
     exit
 }
 
